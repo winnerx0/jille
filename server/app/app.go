@@ -66,6 +66,8 @@ func New(cfg *config.Config) (*App, error) {
 	authHandler := auth.NewAuthHandler(authService)
 
 	// auth handlers
+	app.Router.Post("/api/v1/auth/register", authHandler.RegisterUser)
+
 	app.Router.Post("/api/v1/auth/login", authHandler.LoginUser)
 
 	// user handlers

@@ -18,6 +18,31 @@ func NewAuthHandler(authservice Service) *authHandler {
 	}
 }
 
+func (h *authHandler) RegisterUser(c *fiber.Ctx) error {
+
+	var registerRequest dto.CreateUserRequest
+
+	err := json.Unmarshal(c.Body(), &registerRequest)
+
+	if err != nil {
+		return c.Status(400).JSON(fiber.Map{"message": "Invalid credentials format"})
+	}
+
+	response, err := h.authservie.Register(c.Context(), registerRequest)
+
+	if err != nil {
+		fmt.Println("error", err.Error())
+		return c.Status(400).JSON(fiber.Map{"message": err.Error()})
+	}
+
+	// if response != nil {
+	// 	return c.Status(404).JSON(fiber.Map{"message": "User not found"})
+	// }
+
+	return c.JSON(fiber.Map{"message": "Registration Successful", "data": response})
+
+}
+
 func (h *authHandler) LoginUser(c *fiber.Ctx) error {
 
 	var loginRequest dto.LoginUserRequest

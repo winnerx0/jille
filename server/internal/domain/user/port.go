@@ -13,4 +13,6 @@ type Service interface {
 	ExistsByEmail(ctx context.Context, email string) (bool, error)
 
 	GetUserByEmail(ctx context.Context, email string) (*dto.UserAuthView, error)
+
+	CreateUser(ctx context.Context, user User) error
 }

@@ -38,3 +38,9 @@ func (repo *userRepository) FindByEmail(ctx context.Context, email string) (User
 	return user, err
 }
 
+func (repo *userRepository) Save(ctx context.Context, user *User) error {
+
+	err := gorm.G[User](repo.db).Create(ctx, user)
+
+	return err
+}

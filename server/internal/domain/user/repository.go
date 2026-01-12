@@ -12,4 +12,6 @@ type Repository interface {
 	ExistsByEmail(ctx context.Context, email string) (bool, error)
 
 	FindByEmail(ctx context.Context, email string) (User, error)
+
+	Save(ctx context.Context, user *User) error
 }

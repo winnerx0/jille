@@ -32,7 +32,6 @@ func (s *userservice) GetUserById(ctx context.Context, userID uuid.UUID) (*dto.U
 		return nil, err
 	}
 
-
 	if user.Email == "" {
 		return nil, errors.New("User not found")
 	}
@@ -44,7 +43,7 @@ func (s *userservice) GetUserById(ctx context.Context, userID uuid.UUID) (*dto.U
 	}
 
 	return &dto.UserResponse{
-		ID: user.ID,
+		ID:        user.ID,
 		Email:     user.Email,
 		PollCount: pollCount,
 	}, nil
@@ -74,4 +73,11 @@ func (s *userservice) GetUserByEmail(ctx context.Context, email string) (*dto.Us
 		Password: user.Password,
 		ID:       user.ID,
 	}, nil
+}
+
+func (s *userservice) CreateUser(ctx context.Context, user User) error {
+
+	err := s.userRepo.Save(ctx, &user)
+
+	return err
 }
