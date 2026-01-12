@@ -8,7 +8,7 @@ import (
 	"github.com/winnerx0/jille/internal/domain/jwt"
 )
 
-func JWTMiddleware(c *fiber.Ctx, jwtservice jwt.JwtService) error {
+func JWTMiddleware(c *fiber.Ctx, jwtservice jwt.Service) error {
 
 	authorization := c.Get("Authorization")
 	if authorization == "" {

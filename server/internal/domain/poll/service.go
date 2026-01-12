@@ -5,17 +5,12 @@ import (
 	// "errors"
 
 	"github.com/google/uuid"
-	"github.com/winnerx0/jille/internal/common/dto"
+	"github.com/winnerx0/jille/internal/domain/user"
 )
-
-type UserService interface {
-	GetUserById(ctx context.Context, userID uuid.UUID) (*dto.UserResponse, error)
-}
-
 
 type pollservice struct {
 	repo        Repository
-	userservice UserService
+	userservice user.Service
 }
 
 func NewPollService(repo Repository) *pollservice {

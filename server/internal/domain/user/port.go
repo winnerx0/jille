@@ -1,4 +1,4 @@
-package common
+package user
 
 import (
 	"context"
@@ -7,7 +7,7 @@ import (
 	"github.com/winnerx0/jille/internal/common/dto"
 )
 
-type UserService interface {
+type Service interface {
 	GetUserById(ctx context.Context, userID uuid.UUID) (*dto.UserResponse, error)
 
 	ExistsByEmail(ctx context.Context, email string) (bool, error)

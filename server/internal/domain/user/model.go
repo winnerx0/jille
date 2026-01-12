@@ -4,8 +4,6 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/winnerx0/jille/internal/domain/option"
-	"github.com/winnerx0/jille/internal/domain/poll"
 	"gorm.io/gorm"
 )
 
@@ -16,7 +14,4 @@ type User struct {
 	Email    string    `gorm:"not null;unique"`
 	Password string    `gorm:"not null"`
 	JoinedAt time.Time `gorm:"not null"`
-
-	Options []option.Option `gorm:"foreignKey:VoterID;references:ID"`
-	Polls   []poll.Poll     `gorm:"foreignKey:UserID;references:ID"`
 }

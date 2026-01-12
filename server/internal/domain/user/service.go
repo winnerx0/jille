@@ -17,15 +17,7 @@ type userservice struct {
 	pollService pollservice
 }
 
-type UserService interface {
-	GetUserById(ctx context.Context, userID uuid.UUID) (*dto.UserResponse, error)
-
-	ExistsByEmail(ctx context.Context, email string) (bool, error)
-
-	GetUserByEmail(ctx context.Context, email string) (*dto.UserAuthView, error)
-}
-
-func NewUserService(userRepo Repository, pollservice pollservice) UserService {
+func NewUserService(userRepo Repository, pollservice pollservice) Service {
 	return &userservice{
 		userRepo:    userRepo,
 		pollService: pollservice,

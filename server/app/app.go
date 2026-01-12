@@ -25,7 +25,6 @@ type App struct {
 }
 
 func New(cfg *config.Config) (*App, error) {
-
 	r := fiber.New()
 
 	database := &database.DBConfig{
@@ -80,7 +79,6 @@ func New(cfg *config.Config) (*App, error) {
 }
 
 func (a *App) Run() {
-
 	fmt.Println("Server running on port", a.Config.Port)
 	if err := a.Router.Listen(":" + a.Config.Port); err != nil {
 		fmt.Println("Error occurred when running server", err)
