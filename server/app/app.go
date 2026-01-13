@@ -9,11 +9,11 @@ import (
 	"github.com/winnerx0/jille/api/middleware"
 	"github.com/winnerx0/jille/config"
 	"github.com/winnerx0/jille/infra/database"
-	"github.com/winnerx0/jille/internal/domain/auth"
-	"github.com/winnerx0/jille/internal/domain/jwt"
-	"github.com/winnerx0/jille/internal/domain/option"
-	"github.com/winnerx0/jille/internal/domain/poll"
-	"github.com/winnerx0/jille/internal/domain/user"
+	"github.com/winnerx0/jille/infra/persistence"
+	"github.com/winnerx0/jille/internal/application"
+	"github.com/winnerx0/jille/internal/delivery/web"
+	"github.com/winnerx0/jille/internal/domain"
+	"github.com/winnerx0/jille/internal/utils"
 )
 
 type App struct {
@@ -25,6 +25,11 @@ type App struct {
 }
 
 func New(cfg *config.Config) (*App, error) {
+
+	validator := &utils.XValidator{
+		Validator: utils.Validate,
+	}
+
 	r := fiber.New()
 
 	database := &database.DBConfig{
@@ -39,7 +44,11 @@ func New(cfg *config.Config) (*App, error) {
 
 	db, err := database.New()
 
-	db.AutoMigrate(&user.User{}, &auth.RefreshToken{}, &poll.Poll{}, &option.Option{})
+	if err == nil {
+		db.Exec("CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\"")
+	}
+
+	db.AutoMigrate(&domain.User{}, &domain.RefreshToken{}, &domain.Poll{}, &domain.Option{}, &domain.Vote{})
 
 	app := &App{
 		Config: cfg,
@@ -47,35 +56,55 @@ func New(cfg *config.Config) (*App, error) {
 		DB:     db,
 	}
 
-	userRepo := user.NewUserReposiory(db)
+	userRepo := persistence.NewUserReposiory(db)
 
-	pollRepo := poll.NewPollRepository(db)
+	pollRepo := persistence.NewPollRepository(db)
 
-	pollService := poll.NewPollService(pollRepo)
+	optionRepo := persistence.NewOptionRepository(db)
 
-	userService := user.NewUserService(userRepo, pollService)
+	pollService := application.NewPollService(pollRepo, optionRepo)
 
-	userHandler := user.NewUserHandler(userService)
+	userService := application.NewUserService(userRepo, pollService)
 
-	authRepo := auth.NewAuthRepository(db)
+	userHandler := web.NewUserHandler(userService)
 
-	jwtservice := jwt.NewJwtService(cfg.JWT_ACCESS_TOKEN_SECRET, cfg.JWT_REFRESH_TOKEN_SECRET)
+	authRepo := persistence.NewAuthRepository(db)
 
-	authService := auth.NewAuthService(authRepo, userService, jwtservice)
+	jwtservice := application.NewJwtService(cfg.JWT_ACCESS_TOKEN_SECRET, cfg.JWT_REFRESH_TOKEN_SECRET)
 
-	authHandler := auth.NewAuthHandler(authService)
+	authService := application.NewAuthService(authRepo, userService, jwtservice)
 
-	// auth handlers
-	app.Router.Post("/api/v1/auth/register", authHandler.RegisterUser)
+	authHandler := web.NewAuthHandler(authService, *validator)
 
-	app.Router.Post("/api/v1/auth/login", authHandler.LoginUser)
+	pollHandler := web.NewPollHandler(pollService, *validator)
 
-	// user handlers
-	userRouter := app.Router.Group("/api/v1/user", func(c *fiber.Ctx) error {
+	apiRouter := app.Router.Group("/api/v1")
+
+	// auth routers
+
+	apiRouter.Post("/auth/register", authHandler.RegisterUser)
+
+	apiRouter.Post("/auth/login", authHandler.LoginUser)
+
+	apiRouter.Post("/auth/refresh", authHandler.RefreshToken)
+
+	// user routers
+
+	userRouter := apiRouter.Group("/user", func(c *fiber.Ctx) error {
 		return middleware.JWTMiddleware(c, jwtservice)
 	})
 
 	userRouter.Get("/:userID", userHandler.GetUser)
+
+	// poll routerrs
+
+	pollRouter := apiRouter.Group("/poll", func(c *fiber.Ctx) error {
+		return middleware.JWTMiddleware(c, jwtservice)
+	})
+
+	pollRouter.Post("/create", pollHandler.CreatePoll)
+
+		pollRouter.Post("/:pollID", pollHandler.DeletePoll)
 
 	return app, err
 }

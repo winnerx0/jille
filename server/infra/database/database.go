@@ -34,10 +34,6 @@ func (db *DBConfig) New() (*gorm.DB, error) {
 	if err != nil {
 		return nil, err
 	}
-
-	if err != nil {
-		return nil, err
-	}
-
+	
 	return database, nil
 }

@@ -1,14 +1,13 @@
 package middleware
 
 import (
-	"fmt"
 	"strings"
 
 	"github.com/gofiber/fiber/v2"
-	"github.com/winnerx0/jille/internal/domain/jwt"
+	"github.com/winnerx0/jille/internal/application"
 )
 
-func JWTMiddleware(c *fiber.Ctx, jwtservice jwt.Service) error {
+func JWTMiddleware(c *fiber.Ctx, jwtservice application.JwtService) error {
 
 	authorization := c.Get("Authorization")
 	if authorization == "" {
@@ -19,7 +18,7 @@ func JWTMiddleware(c *fiber.Ctx, jwtservice jwt.Service) error {
 
 	parts := strings.SplitN(authorization, " ", 2)
 	if len(parts) != 2 || parts[0] != "Bearer" {
-		
+
 		c.Response().SetStatusCode(401)
 		return c.JSON(fiber.Map{"message": "Invalid token provided"})
 	}
@@ -27,7 +26,6 @@ func JWTMiddleware(c *fiber.Ctx, jwtservice jwt.Service) error {
 	token := parts[1]
 
 	isVerified, err := jwtservice.VerifyAccessToken(token)
-	fmt.Println("parts", isVerified)
 
 	if err != nil || !isVerified {
 		c.Response().SetStatusCode(401)

@@ -40,3 +40,7 @@ type UserAuthView struct {
 	Email    string
 	Password string
 }
+
+type RefreshTokenRequest struct {
+	RefreshToken string `validate:"required"`
+}
