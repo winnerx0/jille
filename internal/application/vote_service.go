@@ -1,10 +1,13 @@
 package application
 
-import "github.com/winnerx0/jille/internal/application/repository"
+import (
+	"context"
 
-type voteservice struct {
+	"github.com/google/uuid"
+	"github.com/winnerx0/jille/internal/common/dto"
+)
 
-	repo repository.VoteRepository
+type VoteService interface {
+
+	VotePoll(ctx context.Context, pollID uuid.UUID, optionID uuid.UUID) (*dto.VoteResponse, error)
 }
-
-func NewVoteService(repo repository.VoteRepository)

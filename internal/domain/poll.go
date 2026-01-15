@@ -15,6 +15,7 @@ type Poll struct {
 	UpdatedAt time.Time      `gorm:"required;not null"`
 	DeletedAt gorm.DeletedAt `gorm:"index"`
 	UserID    uuid.UUID      `gorm:"required;type:uuid;not null"`
+	ExpiresAt time.Time      `gorm:"not null"`
 }
 
 func (p *Poll) BeforeCreate(tx *gorm.DB) (err error) {

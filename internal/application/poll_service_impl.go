@@ -17,7 +17,7 @@ type pollservice struct {
 
 func NewPollService(repo repository.PollRepository, optionrepo repository.OptionRepository) PollService {
 	return &pollservice{
-    repo: repo,
+		repo:       repo,
 		optionrepo: optionrepo,
 	}
 }
@@ -38,8 +38,9 @@ func (s *pollservice) CreatePoll(ctx context.Context, pollRequest *dto.CreatePol
 	userID := ctx.Value("userID").(string)
 
 	poll := &domain.Poll{
-		Title: pollRequest.Title,
-		UserID: uuid.MustParse(userID),
+		Title:     pollRequest.Title,
+		UserID:    uuid.MustParse(userID),
+		ExpiresAt: pollRequest.ExpiresAt,
 	}
 
 	err := s.repo.Save(ctx, poll)
@@ -48,12 +49,11 @@ func (s *pollservice) CreatePoll(ctx context.Context, pollRequest *dto.CreatePol
 		return err
 	}
 
-
 	options := make([]domain.Option, len(pollRequest.Options))
 
 	for i, option := range pollRequest.Options {
 		options[i] = domain.Option{
-			Name: option,
+			Name:   option,
 			PollID: poll.ID,
 		}
 	}

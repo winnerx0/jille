@@ -70,13 +70,19 @@ func New(cfg *config.Config) (*App, error) {
 
 	authRepo := persistence.NewAuthRepository(db)
 
-	jwtservice := application.NewJwtService(cfg.JWT_ACCESS_TOKEN_SECRET, cfg.JWT_REFRESH_TOKEN_SECRET)
+	jwtService := application.NewJwtService(cfg.JWT_ACCESS_TOKEN_SECRET, cfg.JWT_REFRESH_TOKEN_SECRET)
 
-	authService := application.NewAuthService(authRepo, userService, jwtservice)
+	authService := application.NewAuthService(authRepo, userService, jwtService)
 
 	authHandler := web.NewAuthHandler(authService, *validator)
 
 	pollHandler := web.NewPollHandler(pollService, *validator)
+
+	voteRepo := persistence.NewVoteRepository(db)
+
+	voteservice := application.NewVoteService(voteRepo, pollRepo, optionRepo)
+
+	voteHandler := web.NewVoteHandler(voteservice)
 
 	apiRouter := app.Router.Group("/api/v1")
 
@@ -91,20 +97,28 @@ func New(cfg *config.Config) (*App, error) {
 	// user routers
 
 	userRouter := apiRouter.Group("/user", func(c *fiber.Ctx) error {
-		return middleware.JWTMiddleware(c, jwtservice)
+		return middleware.JWTMiddleware(c, jwtService)
 	})
 
 	userRouter.Get("/:userID", userHandler.GetUser)
 
-	// poll routerrs
+	// poll routers
 
 	pollRouter := apiRouter.Group("/poll", func(c *fiber.Ctx) error {
-		return middleware.JWTMiddleware(c, jwtservice)
+		return middleware.JWTMiddleware(c, jwtService)
 	})
 
 	pollRouter.Post("/create", pollHandler.CreatePoll)
 
-		pollRouter.Post("/:pollID", pollHandler.DeletePoll)
+	pollRouter.Post("/:pollID", pollHandler.DeletePoll)
+
+	// vote routers
+
+	voteRouter := apiRouter.Group("/vote", func(c *fiber.Ctx) error {
+		return middleware.JWTMiddleware(c, jwtService)
+	})
+
+	voteRouter.Post("/:pollId/:optionId", voteHandler.VotePoll)
 
 	return app, err
 }
