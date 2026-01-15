@@ -21,11 +21,11 @@ func NewVoteRepository(db *gorm.DB) repository.VoteRepository {
 func (v *votereposutory) Vote(ctx context.Context, pollID uuid.UUID, optionID uuid.UUID, userID uuid.UUID) error {
 
 
-	v.db.Create(&domain.Vote{
-		PollID:   pollID,
+	err := gorm.G[domain.Vote](v.db).Create(ctx, &domain.Vote{
+		PollID: pollID,
+		UserID: userID,
 		OptionID: optionID,
-		UserID:   userID,
 	})
 
-	return nil
+	return err
 }

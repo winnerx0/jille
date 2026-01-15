@@ -1,3 +1,3 @@
 # Jille
 
-A simple voting system written in Go
+A simple voting system written in Go (Fiber)
