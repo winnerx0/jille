@@ -91,6 +91,12 @@ func New(cfg *config.Config) (*App, error) {
 
 	// auth routers
 
+	// @Summary Register user to Jille
+	// @Accept json
+	// @Produce json
+	// @Success 200 {object}
+	// @Failure 400
+	// @Router /auth/register [POST]
 	apiRouter.Post("/auth/register", authHandler.RegisterUser)
 
 	apiRouter.Post("/auth/login", authHandler.LoginUser)
