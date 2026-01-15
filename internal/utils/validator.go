@@ -37,7 +37,7 @@ func init() {
 	})
 }
 
-func (v XValidator) Validate(data interface{}) error {
+func (v XValidator) Validate(data any) error {
 	var validationError error
 
 	err := Validate.Struct(data)

@@ -17,7 +17,7 @@ type pollservice struct {
 
 func NewPollService(repo repository.PollRepository, optionrepo repository.OptionRepository) PollService {
 	return &pollservice{
-		repo: repo,
+    repo: repo,
 		optionrepo: optionrepo,
 	}
 }
