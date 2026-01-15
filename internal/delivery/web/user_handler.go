@@ -1,7 +1,7 @@
 package web
 
 import (
-	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v3"
 	"github.com/google/uuid"
 	"github.com/winnerx0/jille/internal/application"
 )
@@ -16,11 +16,11 @@ func NewUserHandler(userservice application.UserService) *UserHandler {
 	}
 }
 
-func (h *UserHandler) GetUser(c *fiber.Ctx) error {
+func (h *UserHandler) GetUser(c fiber.Ctx) error {
 
 	userID := c.Params("userID")
 
-	response, err := h.userservice.GetUserById(c.Context(), uuid.MustParse(userID))
+	response, err := h.userservice.GetUserById(c.RequestCtx(), uuid.MustParse(userID))
 
 	if err != nil {
 		c.Status(500).JSON(fiber.Map{"message": err.Error()})
@@ -28,3 +28,5 @@ func (h *UserHandler) GetUser(c *fiber.Ctx) error {
 
 	return c.JSON(fiber.Map{"message": "User retrieved successfully", "data": response})
 }
+
+// fiber:context-methods migrated

@@ -3,9 +3,10 @@ package app
 import (
 	"fmt"
 
-	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v3"
 	"gorm.io/gorm"
 
+	"github.com/gofiber/swagger/v2"
 	"github.com/winnerx0/jille/api/middleware"
 	"github.com/winnerx0/jille/config"
 	"github.com/winnerx0/jille/infra/database"
@@ -84,6 +85,8 @@ func New(cfg *config.Config) (*App, error) {
 
 	voteHandler := web.NewVoteHandler(voteservice)
 
+	app.Router.Get("/swagger/*", swagger.HandlerDefault)
+
 	apiRouter := app.Router.Group("/api/v1")
 
 	// auth routers
@@ -96,7 +99,7 @@ func New(cfg *config.Config) (*App, error) {
 
 	// user routers
 
-	userRouter := apiRouter.Group("/user", func(c *fiber.Ctx) error {
+	userRouter := apiRouter.Group("/user", func(c fiber.Ctx) error {
 		return middleware.JWTMiddleware(c, jwtService)
 	})
 
@@ -104,7 +107,7 @@ func New(cfg *config.Config) (*App, error) {
 
 	// poll routers
 
-	pollRouter := apiRouter.Group("/poll", func(c *fiber.Ctx) error {
+	pollRouter := apiRouter.Group("/poll", func(c fiber.Ctx) error {
 		return middleware.JWTMiddleware(c, jwtService)
 	})
 
@@ -114,7 +117,7 @@ func New(cfg *config.Config) (*App, error) {
 
 	// vote routers
 
-	voteRouter := apiRouter.Group("/vote", func(c *fiber.Ctx) error {
+	voteRouter := apiRouter.Group("/vote", func(c fiber.Ctx) error {
 		return middleware.JWTMiddleware(c, jwtService)
 	})
 

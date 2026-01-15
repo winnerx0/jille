@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v3"
 	"github.com/winnerx0/jille/internal/application"
 	"github.com/winnerx0/jille/internal/common/dto"
 	"github.com/winnerx0/jille/internal/utils"
@@ -22,11 +22,11 @@ func NewAuthHandler(authservice application.AuthService, validator utils.XValida
 	}
 }
 
-func (h *authHandler) RegisterUser(c *fiber.Ctx) error {
+func (h *authHandler) RegisterUser(c fiber.Ctx) error {
 
 	var registerRequest dto.CreateUserRequest
 
-	if err := c.BodyParser(&registerRequest); err != nil {
+	if err := c.Bind().Body(&registerRequest); err != nil {
 		return c.Status(400).JSON(fiber.Map{"message": err.Error()})
 	}
 
@@ -36,7 +36,7 @@ func (h *authHandler) RegisterUser(c *fiber.Ctx) error {
 		})
 	}
 
-	response, err := h.authservie.Register(c.Context(), registerRequest)
+	response, err := h.authservie.Register(c.RequestCtx(), registerRequest)
 
 	if err != nil {
 		fmt.Println("error", err.Error())
@@ -51,7 +51,7 @@ func (h *authHandler) RegisterUser(c *fiber.Ctx) error {
 
 }
 
-func (h *authHandler) LoginUser(c *fiber.Ctx) error {
+func (h *authHandler) LoginUser(c fiber.Ctx) error {
 
 	var loginRequest dto.LoginUserRequest
 
@@ -67,7 +67,7 @@ func (h *authHandler) LoginUser(c *fiber.Ctx) error {
 		})
 	}
 
-	response, err := h.authservie.Login(c.Context(), loginRequest)
+	response, err := h.authservie.Login(c.RequestCtx(), loginRequest)
 
 	if err != nil {
 		fmt.Println("error", err.Error())
@@ -82,11 +82,11 @@ func (h *authHandler) LoginUser(c *fiber.Ctx) error {
 
 }
 
-func (h *authHandler) RefreshToken(c *fiber.Ctx) error {
+func (h *authHandler) RefreshToken(c fiber.Ctx) error {
 
 	var refreshTokenRequest dto.RefreshTokenRequest
 
-	if err := c.BodyParser(&refreshTokenRequest); err != nil {
+	if err := c.Bind().Body(&refreshTokenRequest); err != nil {
 		return c.Status(400).JSON(fiber.Map{"message": err.Error()})
 	}
 
@@ -96,7 +96,7 @@ func (h *authHandler) RefreshToken(c *fiber.Ctx) error {
 		})
 	}
 
-	response, err := h.authservie.RefreshToken(c.Context(), refreshTokenRequest)
+	response, err := h.authservie.RefreshToken(c.RequestCtx(), refreshTokenRequest)
 
 	if err != nil {
 		if err == utils.TokenNotFoundError {
@@ -116,3 +116,5 @@ func (h *authHandler) RefreshToken(c *fiber.Ctx) error {
 	return c.JSON(fiber.Map{"message": "Refresh token successful", "data": response})
 
 }
+
+// fiber:context-methods migrated

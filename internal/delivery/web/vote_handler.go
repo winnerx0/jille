@@ -3,14 +3,13 @@ package web
 import (
 	"errors"
 
-	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v3"
 	"github.com/google/uuid"
 	"github.com/winnerx0/jille/internal/application"
 	"github.com/winnerx0/jille/internal/utils"
 )
 
 type votehandler struct {
-
 	voteservice application.VoteService
 }
 
@@ -20,13 +19,13 @@ func NewVoteHandler(voteservice application.VoteService) *votehandler {
 	}
 }
 
-func (h *votehandler) VotePoll(c *fiber.Ctx) error {
+func (h *votehandler) VotePoll(c fiber.Ctx) error {
 
 	pollID := uuid.MustParse(c.Params("pollId"))
 
 	optionId := uuid.MustParse(c.Params("optionId"))
-	
-	response, err := h.voteservice.VotePoll(c.Context(), pollID, optionId)
+
+	response, err := h.voteservice.VotePoll(c.RequestCtx(), pollID, optionId)
 
 	if err != nil {
 		if errors.Is(err, utils.PollExpiredError) {
@@ -40,3 +39,5 @@ func (h *votehandler) VotePoll(c *fiber.Ctx) error {
 
 	return c.JSON(response)
 }
+
+// fiber:context-methods migrated

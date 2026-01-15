@@ -3,11 +3,11 @@ package middleware
 import (
 	"strings"
 
-	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v3"
 	"github.com/winnerx0/jille/internal/application"
 )
 
-func JWTMiddleware(c *fiber.Ctx, jwtservice application.JwtService) error {
+func JWTMiddleware(c fiber.Ctx, jwtservice application.JwtService) error {
 
 	authorization := c.Get("Authorization")
 	if authorization == "" {
