@@ -115,3 +115,10 @@ func (m *MockPollService) DeletePoll(ctx context.Context, pollID uuid.UUID) erro
 	args := m.Called(ctx, pollID)
 	return args.Error(0)
 }
+
+func (m *MockPollService) GetPollView(ctx context.Context, pollID uuid.UUID) (*dto.PollViewResponse, error) {
+
+	args := m.Called(ctx, pollID)
+
+	return args.Get(0).(*dto.PollViewResponse), args.Error(1)
+}

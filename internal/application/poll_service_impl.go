@@ -3,16 +3,17 @@ package application
 import (
 	"context"
 	"errors"
+
 	"github.com/google/uuid"
 	"github.com/winnerx0/jille/internal/application/repository"
 	"github.com/winnerx0/jille/internal/common/dto"
 	"github.com/winnerx0/jille/internal/domain"
+	"github.com/winnerx0/jille/internal/utils"
 )
 
 type pollservice struct {
-	repo        repository.PollRepository
-	optionrepo  repository.OptionRepository
-	userservice UserService
+	repo       repository.PollRepository
+	optionrepo repository.OptionRepository
 }
 
 func NewPollService(repo repository.PollRepository, optionrepo repository.OptionRepository) PollService {
@@ -86,4 +87,40 @@ func (s *pollservice) DeletePoll(ctx context.Context, pollID uuid.UUID) error {
 	}
 
 	return nil
+}
+
+func (s *pollservice) GetPollView(ctx context.Context, pollID uuid.UUID) (*dto.PollViewResponse, error) {
+
+	poll, err := s.repo.FindPollByID(ctx, pollID)
+
+	if err != nil {
+		return &dto.PollViewResponse{}, err
+	}
+
+	if ctx.Value("userid").(string) != poll.UserID.String() {
+		return &dto.PollViewResponse{}, utils.PollAccessDeniedError
+	}
+
+	options, err := s.optionrepo.FindOptionsByPollID(ctx, pollID)
+
+	if err != nil {
+		return &dto.PollViewResponse{}, err
+	}
+
+	var opts []dto.Option
+
+	for _, o := range *options {
+		option := dto.Option{
+			ID:    o.ID.String(),
+			Count: len(o.Votes),
+		}
+
+		opts = append(opts, option)
+	}
+
+	return &dto.PollViewResponse{
+		ID:      pollID.String(),
+		Title:   poll.Title,
+		Options: opts,
+	}, nil
 }

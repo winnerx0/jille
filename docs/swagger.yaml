@@ -1,0 +1,14 @@
+basePath: /
+host: localhost:9000
+info:
+  contact:
+    name: API Support
+  description: This is a the documenetation for Jille API
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: Jille Backend Server API
+  version: "0.1"
+paths: {}
+swagger: "2.0"

@@ -2,6 +2,8 @@ package database
 
 import (
 	"fmt"
+
+	"github.com/winnerx0/jille/internal/domain"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
@@ -36,4 +38,12 @@ func (db *DBConfig) New() (*gorm.DB, error) {
 	}
 	
 	return database, nil
+}
+
+var Models = []any{
+	&domain.User{},
+	&domain.RefreshToken{},
+	&domain.Poll{},
+	&domain.Option{},
+	&domain.Vote{},
 }

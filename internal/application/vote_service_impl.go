@@ -24,11 +24,11 @@ func NewVoteService(repo repository.VoteRepository, pollrepo repository.PollRepo
 	}
 }
 
-func (s *voteservice) VotePoll(ctx context.Context, pollID uuid.UUID, optionID uuid.UUID) (*dto.VoteResponse, error) {
+func (s *voteservice) VotePoll(ctx context.Context, voteRequest dto.VoteRequest) (*dto.VoteResponse, error) {
 
 	userID := ctx.Value("userId").(string)
 
-	poll, err := s.pollrepo.FindPollByID(ctx, pollID)
+	poll, err := s.pollrepo.FindPollByID(ctx, uuid.MustParse(voteRequest.PollID))
 
 	if err != nil {
 		return &dto.VoteResponse{}, err
@@ -42,7 +42,7 @@ func (s *voteservice) VotePoll(ctx context.Context, pollID uuid.UUID, optionID u
 
 	for _, option := range poll.Options {
 
-		if option.ID == optionID {
+		if option.ID == uuid.MustParse(voteRequest.OptionID) {
 			optionExists = true
 		}
 	}
@@ -51,7 +51,7 @@ func (s *voteservice) VotePoll(ctx context.Context, pollID uuid.UUID, optionID u
 		return &dto.VoteResponse{}, utils.OptionNotFound
 	}
 
-	err = s.repo.Vote(ctx, pollID, optionID, uuid.MustParse(userID))
+	err = s.repo.Vote(ctx, uuid.MustParse(voteRequest.PollID), uuid.MustParse(voteRequest.OptionID), uuid.MustParse(userID))
 
 	if err != nil {
 		return &dto.VoteResponse{}, err

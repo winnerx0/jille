@@ -1,6 +1,8 @@
 package web
 
 import (
+	"errors"
+
 	"github.com/gofiber/fiber/v3"
 	"github.com/google/uuid"
 	"github.com/winnerx0/jille/internal/application"
@@ -52,4 +54,18 @@ func (h *pollhandler) DeletePoll(c fiber.Ctx) error {
 	return c.JSON(fiber.Map{"message": "Poll deleted successfully"})
 }
 
-// fiber:context-methods migrated
+func (h *pollhandler) GetPollView(c fiber.Ctx) error {
+
+	pollID := c.Params("pollID")
+
+	response, err := h.pollservice.GetPollView(c.RequestCtx(), uuid.MustParse(pollID))
+
+	if err != nil {
+		if errors.Is(err, utils.PollAccessDeniedError) {
+			return c.Status(403).JSON(fiber.Map{"message": err.Error()})
+		}
+		return c.Status(400).JSON(fiber.Map{"message": err.Error()})
+	}
+
+	return c.JSON(response)
+}

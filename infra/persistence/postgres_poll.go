@@ -2,11 +2,11 @@ package persistence
 
 import (
 	"context"
-	"errors"
 
 	"github.com/google/uuid"
 	"github.com/winnerx0/jille/internal/application/repository"
 	"github.com/winnerx0/jille/internal/domain"
+	"github.com/winnerx0/jille/internal/utils"
 	"gorm.io/gorm"
 )
 
@@ -38,8 +38,12 @@ func (repo *pollRepository) Save(ctx context.Context, poll *domain.Poll) error {
 }
 
 func (repo *pollRepository) FindPollByID(ctx context.Context, pollID uuid.UUID) (*domain.Poll, error) {
-	var poll domain.Poll
-	err := repo.db.First(&poll, pollID).Error
+
+	poll, err := gorm.G[domain.Poll](repo.db).Where("id = ?", pollID).First(ctx)
+
+	if poll.Title == "" {
+		return nil, utils.PollNotFoundError
+	}
 	if err != nil {
 		return nil, err
 	}
@@ -54,7 +58,7 @@ func (repo *pollRepository) Delete(ctx context.Context, pollID uuid.UUID) error 
 	}
 
 	if rows == 0 {
-		return errors.New("poll not found")
+		return utils.PollNotFoundError
 	}
 
 	return nil

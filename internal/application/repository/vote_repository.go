@@ -7,5 +7,5 @@ import (
 )
 
 type VoteRepository interface {
-		Vote(ctx context.Context, pollID uuid.UUID, optionID uuid.UUID, userID uuid.UUID) error
+	Vote(ctx context.Context, pollID uuid.UUID, optionID uuid.UUID, userID uuid.UUID) error
 }

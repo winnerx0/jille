@@ -17,8 +17,9 @@ type User struct {
 	UpdatedAt time.Time      `gorm:"not null"`
 	DeletedAt gorm.DeletedAt `gorm:"index"`
 
-	Polls []Poll `gorm:"foreignKey:UserID;references:ID"`
-	Votes []Vote `gorm:"foreignKey:UserID;references:ID"`
+	Polls         []Poll         `gorm:"foreignKey:UserID;references:ID"`
+	Votes         []Vote         `gorm:"foreignKey:UserID;references:ID"`
+	RefreshTokens []RefreshToken `gorm:"foreignKey:UserID;references:ID"`
 }
 
 func (u *User) BeforeCreate(tx *gorm.DB) (err error) {

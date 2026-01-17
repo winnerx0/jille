@@ -71,6 +71,14 @@ func (m *OptionRepository) Save(ctx context.Context, options *[]domain.Option) e
 	return args.Error(0)
 }
 
+func (m *OptionRepository) FindOptionsByPollID(ctx context.Context, pollID uuid.UUID) (*[]domain.Option, error) {
+
+
+	args := m.Called(ctx, pollID)
+
+	return args.Get(0).(*[]domain.Option), args.Error(1)
+}
+
 // AuthRepository Mock
 type AuthRepository struct {
 	mock.Mock

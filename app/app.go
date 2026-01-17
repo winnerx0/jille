@@ -2,6 +2,7 @@ package app
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/gofiber/fiber/v3"
 	"gorm.io/gorm"
@@ -9,11 +10,10 @@ import (
 	"github.com/gofiber/swagger/v2"
 	"github.com/winnerx0/jille/api/middleware"
 	"github.com/winnerx0/jille/config"
-	"github.com/winnerx0/jille/infra/database"
+	 "github.com/winnerx0/jille/infra/database"
 	"github.com/winnerx0/jille/infra/persistence"
 	"github.com/winnerx0/jille/internal/application"
 	"github.com/winnerx0/jille/internal/delivery/web"
-	"github.com/winnerx0/jille/internal/domain"
 	"github.com/winnerx0/jille/internal/utils"
 )
 
@@ -33,7 +33,7 @@ func New(cfg *config.Config) (*App, error) {
 
 	r := fiber.New()
 
-	database := &database.DBConfig{
+	dbConfig := &database.DBConfig{
 		Host:     cfg.DBConfig.Host,
 		Port:     cfg.DBConfig.Port,
 		User:     cfg.DBConfig.User,
@@ -43,13 +43,15 @@ func New(cfg *config.Config) (*App, error) {
 		TimeZone: cfg.DBConfig.TimeZone,
 	}
 
-	db, err := database.New()
+	db, err := dbConfig.New()
 
-	if err == nil {
-		db.Exec("CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\"")
+	if err != nil {
+		log.Fatal("Error connecting to database", err.Error())
 	}
 
-	db.AutoMigrate(&domain.User{}, &domain.RefreshToken{}, &domain.Poll{}, &domain.Option{}, &domain.Vote{})
+	// if err := db.AutoMigrate(database.Models...); err != nil {
+	// 		log.Fatal("Error migrating dataabse tables", err.Error())
+	// }
 
 	app := &App{
 		Config: cfg,
@@ -89,14 +91,6 @@ func New(cfg *config.Config) (*App, error) {
 
 	apiRouter := app.Router.Group("/api/v1")
 
-	// auth routers
-
-	// @Summary Register user to Jille
-	// @Accept json
-	// @Produce json
-	// @Success 200 {object}
-	// @Failure 400
-	// @Router /auth/register [POST]
 	apiRouter.Post("/auth/register", authHandler.RegisterUser)
 
 	apiRouter.Post("/auth/login", authHandler.LoginUser)
@@ -127,7 +121,7 @@ func New(cfg *config.Config) (*App, error) {
 		return middleware.JWTMiddleware(c, jwtService)
 	})
 
-	voteRouter.Post("/:pollId/:optionId", voteHandler.VotePoll)
+	voteRouter.Post("/", voteHandler.VotePoll)
 
 	return app, err
 }

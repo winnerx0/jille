@@ -14,4 +14,6 @@ type PollService interface {
 		CreatePoll(ctx context.Context, poll *dto.CreatePollRequest) error
 
 		DeletePoll(ctx context.Context, pollID uuid.UUID) error
+
+		GetPollView(ctx context.Context, pollID uuid.UUID) (*dto.PollViewResponse, error)
 }

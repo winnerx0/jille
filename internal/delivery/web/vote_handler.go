@@ -4,8 +4,8 @@ import (
 	"errors"
 
 	"github.com/gofiber/fiber/v3"
-	"github.com/google/uuid"
 	"github.com/winnerx0/jille/internal/application"
+	"github.com/winnerx0/jille/internal/common/dto"
 	"github.com/winnerx0/jille/internal/utils"
 )
 
@@ -21,11 +21,13 @@ func NewVoteHandler(voteservice application.VoteService) *votehandler {
 
 func (h *votehandler) VotePoll(c fiber.Ctx) error {
 
-	pollID := uuid.MustParse(c.Params("pollId"))
+	var voteRequst dto.VoteRequest
 
-	optionId := uuid.MustParse(c.Params("optionId"))
+	if err := c.Bind().Body(&voteRequst); err != nil {
+		return c.Status(400).JSON(fiber.Map{"message": "Failed to parse body"})
+	}
 
-	response, err := h.voteservice.VotePoll(c.RequestCtx(), pollID, optionId)
+	response, err := h.voteservice.VotePoll(c.RequestCtx(), voteRequst)
 
 	if err != nil {
 		if errors.Is(err, utils.PollExpiredError) {
