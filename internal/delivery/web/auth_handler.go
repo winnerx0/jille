@@ -47,7 +47,7 @@ func (h *authHandler) RegisterUser(c fiber.Ctx) error {
 	// 	return c.Status(404).JSON(fiber.Map{"message": "User not found"})
 	// }
 
-	return c.JSON(fiber.Map{"message": "Registration Successful", "data": response})
+	return c.JSON(response)
 
 }
 
@@ -78,7 +78,7 @@ func (h *authHandler) LoginUser(c fiber.Ctx) error {
 		return c.Status(404).JSON(fiber.Map{"message": "User not found"})
 	}
 
-	return c.JSON(fiber.Map{"message": "Login Successful", "data": response})
+	return c.JSON(response)
 
 }
 
@@ -113,8 +113,6 @@ func (h *authHandler) RefreshToken(c fiber.Ctx) error {
 		return c.Status(404).JSON(fiber.Map{"message": "User not found"})
 	}
 
-	return c.JSON(fiber.Map{"message": "Refresh token successful", "data": response})
+	return c.JSON(response)
 
 }
-
-// fiber:context-methods migrated

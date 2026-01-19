@@ -4,6 +4,8 @@ import (
 	"context"
 	"errors"
 
+	"fmt"
+
 	"github.com/google/uuid"
 	"github.com/winnerx0/jille/internal/application/repository"
 	"github.com/winnerx0/jille/internal/common/dto"
@@ -14,12 +16,14 @@ import (
 type pollservice struct {
 	repo       repository.PollRepository
 	optionrepo repository.OptionRepository
+	voterepo   repository.VoteRepository
 }
 
-func NewPollService(repo repository.PollRepository, optionrepo repository.OptionRepository) PollService {
+func NewPollService(repo repository.PollRepository, optionrepo repository.OptionRepository, voterepo repository.VoteRepository) PollService {
 	return &pollservice{
 		repo:       repo,
 		optionrepo: optionrepo,
+		voterepo:   voterepo,
 	}
 }
 
@@ -97,8 +101,57 @@ func (s *pollservice) GetPollView(ctx context.Context, pollID uuid.UUID) (*dto.P
 		return &dto.PollViewResponse{}, err
 	}
 
-	if ctx.Value("userid").(string) != poll.UserID.String() {
+	if ctx.Value("userID").(string) != poll.UserID.String() {
 		return &dto.PollViewResponse{}, utils.PollAccessDeniedError
+	}
+
+	options, err := s.optionrepo.FindOptionsByPollID(ctx, pollID)
+
+	if err != nil {
+		return &dto.PollViewResponse{}, err
+	}
+
+	var opts []dto.Option
+
+	for _, o := range *options {
+
+		votes := []dto.Vote{}
+
+		for _, v := range o.Votes {
+			vote := dto.Vote{
+				ID:       v.ID.String(),
+				UserID:   v.UserID.String(),
+				PollID:   v.PollID.String(),
+				OptionID: v.OptionID.String(),
+			}
+
+			votes = append(votes, vote)
+		}
+		option := dto.Option{
+			ID:    o.ID.String(),
+			Votes: votes,
+			Name:  o.Name,
+		}
+
+		opts = append(opts, option)
+	}
+
+	return &dto.PollViewResponse{
+		ID:        pollID.String(),
+		Title:     poll.Title,
+		Options:   opts,
+		CreatedAt: poll.CreatedAt,
+		ExpiresAt: poll.ExpiresAt,
+		CreatorID: poll.UserID.String(),
+	}, nil
+}
+
+func (s *pollservice) GetPoll(ctx context.Context, pollID uuid.UUID) (*dto.PollViewResponse, error) {
+
+	poll, err := s.repo.FindPollByID(ctx, pollID)
+
+	if err != nil {
+		return &dto.PollViewResponse{}, err
 	}
 
 	options, err := s.optionrepo.FindOptionsByPollID(ctx, pollID)
@@ -112,15 +165,85 @@ func (s *pollservice) GetPollView(ctx context.Context, pollID uuid.UUID) (*dto.P
 	for _, o := range *options {
 		option := dto.Option{
 			ID:    o.ID.String(),
-			Count: len(o.Votes),
+			Votes: []dto.Vote{}, // Hidden for public voting page
+			Name:  o.Name,
 		}
 
 		opts = append(opts, option)
 	}
+	
+	userID := ctx.Value("userID").(string)
+
+	voted, err := s.voterepo.ExistsByPollIDAndAndUserID(ctx, pollID, uuid.MustParse(userID))
+
+	if err != nil {
+		return &dto.PollViewResponse{}, err
+	}
 
 	return &dto.PollViewResponse{
-		ID:      pollID.String(),
-		Title:   poll.Title,
-		Options: opts,
+		ID:        pollID.String(),
+		Title:     poll.Title,
+		Options:   opts,
+		CreatedAt: poll.CreatedAt,
+		ExpiresAt: poll.ExpiresAt,
+		CreatorID: poll.UserID.String(),
+		Voted:     voted,
 	}, nil
+}
+
+func (s *pollservice) GetAllPolls(ctx context.Context) (dto.ApiResponse[[]dto.PollViewResponse], error) {
+
+	polls, err := s.repo.FindAllPolls(ctx)
+
+	fmt.Println("polls", polls)
+
+	if err != nil {
+		return dto.ApiResponse[[]dto.PollViewResponse]{Message: "Polls reteieved successfully", Data: []dto.PollViewResponse{}}, err
+	}
+
+	var pollResponse []dto.PollViewResponse
+
+	for _, poll := range polls {
+
+		var opts []dto.Option
+
+		for _, o := range poll.Options {
+
+			votes := []dto.Vote{}
+
+			for _, v := range o.Votes {
+				vote := dto.Vote{
+					ID:       v.ID.String(),
+					UserID:   v.UserID.String(),
+					PollID:   v.PollID.String(),
+					OptionID: v.OptionID.String(),
+				}
+
+				votes = append(votes, vote)
+			}
+
+			option := dto.Option{
+				ID:    o.ID.String(),
+				Votes: votes,
+				Name:  o.Name,
+			}
+
+			opts = append(opts, option)
+		}
+
+		response := dto.PollViewResponse{
+			ID:        poll.ID.String(),
+			Title:     poll.Title,
+			Options:   opts,
+			CreatedAt: poll.CreatedAt,
+			ExpiresAt: poll.ExpiresAt,
+			CreatorID: poll.UserID.String(),
+		}
+
+		pollResponse = append(pollResponse, response)
+	}
+
+	fmt.Println("poll response", pollResponse)
+
+	return dto.ApiResponse[[]dto.PollViewResponse]{Message: "Polls reteieved successfully", Data: pollResponse}, nil
 }

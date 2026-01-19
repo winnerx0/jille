@@ -2,6 +2,7 @@ package application
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"time"
 
@@ -112,7 +113,7 @@ func (s *authservice) Login(ctx context.Context, loginRequest dto.LoginUserReque
 	fmt.Println("user", existingUser)
 
 	if err := bcrypt.CompareHashAndPassword([]byte(existingUser.Password), []byte(loginRequest.Password)); err != nil {
-		return nil, err
+		return nil, errors.New("Invalid password")
 	}
 
 	accessToken, err := s.jwtservice.GenerateAccessToken(existingUser.ID.String())

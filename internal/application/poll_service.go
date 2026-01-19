@@ -8,12 +8,14 @@ import (
 )
 
 type PollService interface {
+	GetPollCount(ctx context.Context, userID uuid.UUID) (int, error)
 
-		GetPollCount(ctx context.Context, userID uuid.UUID) (int, error)
+	CreatePoll(ctx context.Context, poll *dto.CreatePollRequest) error
 
-		CreatePoll(ctx context.Context, poll *dto.CreatePollRequest) error
+	DeletePoll(ctx context.Context, pollID uuid.UUID) error
 
-		DeletePoll(ctx context.Context, pollID uuid.UUID) error
+	GetPollView(ctx context.Context, pollID uuid.UUID) (*dto.PollViewResponse, error)
+	GetPoll(ctx context.Context, pollID uuid.UUID) (*dto.PollViewResponse, error)
 
-		GetPollView(ctx context.Context, pollID uuid.UUID) (*dto.PollViewResponse, error)
+	GetAllPolls(ctx context.Context) (dto.ApiResponse[[]dto.PollViewResponse], error)
 }

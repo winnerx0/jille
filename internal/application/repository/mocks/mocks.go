@@ -61,6 +61,11 @@ func (m *PollRepository) Delete(ctx context.Context, pollID uuid.UUID) error {
 	return args.Error(0)
 }
 
+func (m *PollRepository) FindAllPolls(ctx context.Context) ([]domain.Poll, error) {
+	args := m.Called(ctx)
+	return args.Get(0).([]domain.Poll), args.Error(0)
+}
+
 // OptionRepository Mock
 type OptionRepository struct {
 	mock.Mock
@@ -72,7 +77,6 @@ func (m *OptionRepository) Save(ctx context.Context, options *[]domain.Option) e
 }
 
 func (m *OptionRepository) FindOptionsByPollID(ctx context.Context, pollID uuid.UUID) (*[]domain.Option, error) {
-
 
 	args := m.Called(ctx, pollID)
 
@@ -105,4 +109,26 @@ func (m *AuthRepository) FindByToken(ctx context.Context, token string) (*domain
 func (m *AuthRepository) Delete(ctx context.Context, pollID uuid.UUID) error {
 	args := m.Called(ctx, pollID)
 	return args.Error(0)
+}
+
+
+// VoteRepository Mock
+
+type VoteRepository struct {
+	mock.Mock
+}
+
+func (m *VoteRepository) Vote(ctx context.Context, pollID uuid.UUID, optionID uuid.UUID, userID uuid.UUID) error {
+
+	args := m.Called(ctx, pollID, optionID, userID)
+
+	return args.Error(0)
+}
+
+func (m *VoteRepository) ExistsByPollIDAndAndUserID(ctx context.Context, pollID uuid.UUID, userID uuid.UUID) (bool, error) {
+
+
+	args := m.Called(ctx, pollID, userID)
+
+	return args.Bool(0), args.Error(1)
 }

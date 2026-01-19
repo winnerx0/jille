@@ -1,6 +1,7 @@
 package web
 
 import (
+	"context"
 	"errors"
 
 	"github.com/gofiber/fiber/v3"
@@ -36,7 +37,8 @@ func (h *pollhandler) CreatePoll(c fiber.Ctx) error {
 		})
 	}
 
-	if err := h.pollservice.CreatePoll(c.RequestCtx(), &pollRequest); err != nil {
+	ctx := context.WithValue(c.Context(), "userID", c.Locals("userID"))
+	if err := h.pollservice.CreatePoll(ctx, &pollRequest); err != nil {
 		return c.Status(400).JSON(fiber.Map{"message": err.Error()})
 	}
 
@@ -47,7 +49,8 @@ func (h *pollhandler) DeletePoll(c fiber.Ctx) error {
 
 	pollID := c.Params("pollID")
 
-	if err := h.pollservice.DeletePoll(c.RequestCtx(), uuid.MustParse(pollID)); err != nil {
+	ctx := context.WithValue(c.Context(), "userID", c.Locals("userID"))
+	if err := h.pollservice.DeletePoll(ctx, uuid.MustParse(pollID)); err != nil {
 		return c.Status(400).JSON(fiber.Map{"message": err.Error()})
 	}
 
@@ -58,7 +61,8 @@ func (h *pollhandler) GetPollView(c fiber.Ctx) error {
 
 	pollID := c.Params("pollID")
 
-	response, err := h.pollservice.GetPollView(c.RequestCtx(), uuid.MustParse(pollID))
+	ctx := context.WithValue(c.Context(), "userID", c.Locals("userID"))
+	response, err := h.pollservice.GetPollView(ctx, uuid.MustParse(pollID))
 
 	if err != nil {
 		if errors.Is(err, utils.PollAccessDeniedError) {
@@ -68,4 +72,29 @@ func (h *pollhandler) GetPollView(c fiber.Ctx) error {
 	}
 
 	return c.JSON(response)
+}
+
+func (h *pollhandler) GetPoll(c fiber.Ctx) error {
+
+	pollID := c.Params("pollID")
+
+	response, err := h.pollservice.GetPoll(c.RequestCtx(), uuid.MustParse(pollID))
+
+	if err != nil {
+		return c.Status(400).JSON(fiber.Map{"message": err.Error()})
+	}
+
+	return c.JSON(response)
+}
+
+func (h *pollhandler) GetAllPolls(c fiber.Ctx) error {
+
+	ctx := context.WithValue(c.Context(), "userID", c.Locals("userID"))
+	polls, err := h.pollservice.GetAllPolls(ctx)
+
+	if err != nil {
+		return c.Status(400).JSON(fiber.Map{"message": err.Error()})
+	}
+
+	return c.JSON(polls)
 }

@@ -15,13 +15,29 @@ type PollResponse struct {
 }
 
 type PollViewResponse struct {
-	ID      string   `json:"id"`
-	Title   string   `json:"title"`
-	Options []Option `json:"options"`
+	ID        string    `json:"id"`
+	Title     string    `json:"title"`
+	Options   []Option  `json:"options"`
+	CreatedAt time.Time `json:"created_at"`
+	ExpiresAt time.Time `json:"expires_at"`
+	CreatorID string    `json:"creator_id"`
+	Voted     bool      `json:"voted"`
+}
+
+type Vote struct {
+	ID       string `json:"id"`
+	UserID   string `json:"user_id"`
+	PollID   string `json:"poll_id"`
+	OptionID string `json:"option_id"`
 }
 
 type Option struct {
 	ID    string `json:"id"`
 	Name  string `json:"name"`
-	Count int    `json:"voter_count"`
+	Votes []Vote `json:"votes"`
+}
+
+type ApiResponse[T any] struct {
+	Message string `json:"message"`
+	Data    T      `json:"data"`
 }

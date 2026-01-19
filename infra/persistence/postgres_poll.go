@@ -39,7 +39,7 @@ func (repo *pollRepository) Save(ctx context.Context, poll *domain.Poll) error {
 
 func (repo *pollRepository) FindPollByID(ctx context.Context, pollID uuid.UUID) (*domain.Poll, error) {
 
-	poll, err := gorm.G[domain.Poll](repo.db).Where("id = ?", pollID).First(ctx)
+	poll, err := gorm.G[domain.Poll](repo.db).Preload("Options.Votes", nil).Where("id = ?", pollID).First(ctx)
 
 	if poll.Title == "" {
 		return nil, utils.PollNotFoundError
@@ -62,4 +62,20 @@ func (repo *pollRepository) Delete(ctx context.Context, pollID uuid.UUID) error 
 	}
 
 	return nil
+}
+
+func (repo *pollRepository) FindAllPolls(ctx context.Context) ([]domain.Poll, error) {
+
+	userID := uuid.MustParse(ctx.Value("userID").(string))
+
+	polls, err := gorm.G[domain.Poll](repo.db).
+		Preload("Options.Votes", nil).
+		Where("user_id = ?", userID).
+		Find(ctx)
+
+	if err != nil {
+		return []domain.Poll{}, err
+	}
+
+	return polls, nil
 }

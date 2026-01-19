@@ -122,3 +122,17 @@ func (m *MockPollService) GetPollView(ctx context.Context, pollID uuid.UUID) (*d
 
 	return args.Get(0).(*dto.PollViewResponse), args.Error(1)
 }
+
+func (m *MockPollService) GetPoll(ctx context.Context, pollID uuid.UUID) (*dto.PollViewResponse, error) {
+
+	args := m.Called(ctx, pollID)
+
+	return args.Get(0).(*dto.PollViewResponse), args.Error(1)
+}
+
+func (m *MockPollService) GetAllPolls(ctx context.Context) (dto.ApiResponse[[]dto.PollViewResponse], error) {
+	args := m.Called(ctx)
+
+	return args.Get(0).(dto.ApiResponse[[]dto.PollViewResponse]), args.Error(1)
+
+}

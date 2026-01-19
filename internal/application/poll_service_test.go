@@ -2,8 +2,8 @@ package application
 
 import (
 	"context"
-	"testing"
 	"errors"
+	"testing"
 
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
@@ -16,7 +16,8 @@ import (
 func TestGetPollCount(t *testing.T) {
 	mockRepo := new(mocks.PollRepository)
 	mockOptionRepo := new(mocks.OptionRepository)
-	service := NewPollService(mockRepo, mockOptionRepo)
+	mockVoteRepo := new(mocks.VoteRepository)
+	service := NewPollService(mockRepo, mockOptionRepo, mockVoteRepo)
 
 	ctx := context.Background()
 	userID := uuid.New()
@@ -33,7 +34,8 @@ func TestGetPollCount(t *testing.T) {
 func TestCreatePoll_Success(t *testing.T) {
 	mockRepo := new(mocks.PollRepository)
 	mockOptionRepo := new(mocks.OptionRepository)
-	service := NewPollService(mockRepo, mockOptionRepo)
+	mockVoteRepo := new(mocks.VoteRepository)
+	service := NewPollService(mockRepo, mockOptionRepo, mockVoteRepo)
 
 	userID := uuid.New()
 	ctx := context.WithValue(context.Background(), "userID", userID.String())
@@ -61,7 +63,8 @@ func TestCreatePoll_Success(t *testing.T) {
 func TestDeletePoll(t *testing.T) {
 	mockRepo := new(mocks.PollRepository)
 	mockOptionRepo := new(mocks.OptionRepository)
-	service := NewPollService(mockRepo, mockOptionRepo)
+	mockVoteRepo := new(mocks.VoteRepository)
+	service := NewPollService(mockRepo, mockOptionRepo, mockVoteRepo)
 
 	ctx := context.Background()
 	pollID := uuid.New()
@@ -77,7 +80,8 @@ func TestDeletePoll(t *testing.T) {
 func TestDeletePoll_Fail(t *testing.T) {
 	mockRepo := new(mocks.PollRepository)
 	mockOptionRepo := new(mocks.OptionRepository)
-	service := NewPollService(mockRepo, mockOptionRepo)
+	mockVoteRepo := new(mocks.VoteRepository)
+	service := NewPollService(mockRepo, mockOptionRepo, mockVoteRepo)
 
 	ctx := context.Background()
 	pollID := uuid.New()

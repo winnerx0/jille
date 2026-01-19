@@ -26,8 +26,7 @@ func (repo optionRepository) Save(ctx context.Context, options *[]domain.Option)
 
 func (v *optionRepository) FindOptionsByPollID(ctx context.Context, pollID uuid.UUID) (*[]domain.Option, error) {
 
-
-	options, err := gorm.G[domain.Option](v.db).Where("poll_id = ?", pollID).Find(ctx)
+	options, err := gorm.G[domain.Option](v.db).Preload("Votes", nil).Where("poll_id = ?", pollID).Find(ctx)
 
 	if err != nil {
 		return &[]domain.Option{}, err

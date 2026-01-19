@@ -26,7 +26,7 @@ func NewVoteService(repo repository.VoteRepository, pollrepo repository.PollRepo
 
 func (s *voteservice) VotePoll(ctx context.Context, voteRequest dto.VoteRequest) (*dto.VoteResponse, error) {
 
-	userID := ctx.Value("userId").(string)
+	userID := ctx.Value("userID").(string)
 
 	poll, err := s.pollrepo.FindPollByID(ctx, uuid.MustParse(voteRequest.PollID))
 

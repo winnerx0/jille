@@ -11,4 +11,5 @@ var (
 	OptionNotFound     = errors.New("Option not found in poll")
 	PollNotFoundError  = errors.New("Poll not found")
 	PollAccessDeniedError = errors.New("Only the creator can view the live votings")
+	VoteAlreadyExistsError = errors.New("You have already voted")
 )

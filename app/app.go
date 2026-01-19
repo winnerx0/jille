@@ -5,12 +5,12 @@ import (
 	"log"
 
 	"github.com/gofiber/fiber/v3"
+	"github.com/gofiber/fiber/v3/middleware/cors"
 	"gorm.io/gorm"
 
-	"github.com/gofiber/swagger/v2"
 	"github.com/winnerx0/jille/api/middleware"
 	"github.com/winnerx0/jille/config"
-	 "github.com/winnerx0/jille/infra/database"
+	"github.com/winnerx0/jille/infra/database"
 	"github.com/winnerx0/jille/infra/persistence"
 	"github.com/winnerx0/jille/internal/application"
 	"github.com/winnerx0/jille/internal/delivery/web"
@@ -26,7 +26,6 @@ type App struct {
 }
 
 func New(cfg *config.Config) (*App, error) {
-
 	validator := &utils.XValidator{
 		Validator: utils.Validate,
 	}
@@ -44,7 +43,6 @@ func New(cfg *config.Config) (*App, error) {
 	}
 
 	db, err := dbConfig.New()
-
 	if err != nil {
 		log.Fatal("Error connecting to database", err.Error())
 	}
@@ -59,13 +57,21 @@ func New(cfg *config.Config) (*App, error) {
 		DB:     db,
 	}
 
+	app.Router.Use(cors.New(cors.Config{
+		AllowOrigins: []string{"http://localhost:3000"},
+		AllowMethods: []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowHeaders: []string{"Content-Type", "Authorization"},
+	}))
+
 	userRepo := persistence.NewUserReposiory(db)
 
 	pollRepo := persistence.NewPollRepository(db)
 
 	optionRepo := persistence.NewOptionRepository(db)
 
-	pollService := application.NewPollService(pollRepo, optionRepo)
+	voteRepo := persistence.NewVoteRepository(db)
+
+	pollService := application.NewPollService(pollRepo, optionRepo, voteRepo)
 
 	userService := application.NewUserService(userRepo, pollService)
 
@@ -81,13 +87,12 @@ func New(cfg *config.Config) (*App, error) {
 
 	pollHandler := web.NewPollHandler(pollService, *validator)
 
-	voteRepo := persistence.NewVoteRepository(db)
+	broker := utils.NewBroker()
+	broker.Start()
 
 	voteservice := application.NewVoteService(voteRepo, pollRepo, optionRepo)
 
 	voteHandler := web.NewVoteHandler(voteservice)
-
-	app.Router.Get("/swagger/*", swagger.HandlerDefault)
 
 	apiRouter := app.Router.Group("/api/v1")
 
@@ -115,13 +120,20 @@ func New(cfg *config.Config) (*App, error) {
 
 	pollRouter.Post("/:pollID", pollHandler.DeletePoll)
 
-	// vote routers
+	pollRouter.Get("/all", pollHandler.GetAllPolls)
 
+	pollRouter.Get("/view/:pollID", pollHandler.GetPollView)
+
+	pollRouter.Get("/:pollID", pollHandler.GetPoll)
+
+	// vote routers
 	voteRouter := apiRouter.Group("/vote", func(c fiber.Ctx) error {
 		return middleware.JWTMiddleware(c, jwtService)
 	})
 
-	voteRouter.Post("/", voteHandler.VotePoll)
+	voteRouter.Post("/", voteHandler.VotePoll(*broker))
+
+	apiRouter.Get("/sse", web.SseHandler(broker))
 
 	return app, err
 }

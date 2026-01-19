@@ -8,4 +8,6 @@ import (
 
 type VoteRepository interface {
 	Vote(ctx context.Context, pollID uuid.UUID, optionID uuid.UUID, userID uuid.UUID) error
+
+	ExistsByPollIDAndAndUserID(ctx context.Context, pollID uuid.UUID, userID uuid.UUID) (bool, error)
 }
