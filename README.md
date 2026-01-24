@@ -68,6 +68,7 @@ Jille follows **Clean Architecture** principles to ensure maintainability, testa
 Copy the example environment file and fill in your credentials:
 
 ```.env
+# .env.example
 PORT=
 JWT_ACCESS_TOKEN_SECRET=
 JWT_REFRESH_TOKEN_SECRET=
@@ -82,7 +83,7 @@ DB_TIMEZONE=
 ```
 
 ```.env
-# client/
+# client/.env.local
 BACKEND_URL=http://localhost:9000
 
 ```
