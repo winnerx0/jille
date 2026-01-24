@@ -1,6 +1,6 @@
 # Jille
 
-A modern, minimal **Voting System** built with **Go** and the **Fiber** web framework.
+A modern, minimal **Voting System** built with **Go** using **Fiber** and **Tanstack Start**.
 
 Jille follows **Clean Architecture** principles to ensure maintainability, testability, and separation of concerns.
 
@@ -8,11 +8,10 @@ Jille follows **Clean Architecture** principles to ensure maintainability, testa
 
 ## Features
 
-- **User Authentication**: Secure JWT-based authentication (Access & Refresh tokens).
+- **User Authentication**: Secure JWT-based authentication.
 - **Poll Management**: Create, view, and manage polls and their options.
 - **Voting System**: Secure and reliable voting mechanism.
 - **Clean Architecture**: Domain-driven design with Hexagonal layers.
-- **Auto-generated Documentation**: Swagger integration for API exploration.
 - **Data Persistence**: Robust PostgreSQL integration with GORM.
 
 ---
@@ -20,11 +19,12 @@ Jille follows **Clean Architecture** principles to ensure maintainability, testa
 ## 🛠️ Tech Stack
 
 - **Language**: [Go](https://go.dev/) (1.25+)
-- **Web Framework**: [Fiber v3](https://docs.gofiber.io/)
+- **Backend Framework**: [Fiber v3](https://docs.gofiber.io/)
 - **ORM**: [GORM](https://gorm.io/)
 - **Database**: [PostgreSQL](https://www.postgresql.org/)
 - **Security**: [JWT](https://github.com/golang-jwt/jwt) & [Bcrypt](https://pkg.go.dev/golang.org/x/crypto/bcrypt)
 - **Validation**: [Go Playground Validator](https://github.com/go-playground/validator)
+- **Frontend Framwork**: [Tanstack Start](https://tanstack.com/start/latest/docs/)
 
 ---
 
@@ -35,9 +35,10 @@ Jille follows **Clean Architecture** principles to ensure maintainability, testa
 ├── api/                
 │   └── middleware    
 ├── app/                  
+├── client/                          
 ├── cmd/
 │   └── api/               
-├── config/                             
+├── config/  
 ├── infra/                 
 │   ├── database            
 │   └── persistence       
@@ -60,6 +61,7 @@ Jille follows **Clean Architecture** principles to ensure maintainability, testa
 
 - **Go 1.25** or higher.
 - **PostgreSQL** instance.
+- **Bun 1.2** runtime or higher
 
 ### 2. Environment Setup
 
@@ -78,6 +80,12 @@ DB_SSLMODE=
 DB_TIMEZONE=
 
 ```
+
+```.env
+# client/
+BACKEND_URL=http://localhost:9000
+
+```
 ### 3. Running the Application
 
 You can use the provided `Makefile`:
@@ -88,6 +96,9 @@ make run
 
 # To build the binary
 make build
+
+# To run the frontend
+make client
 ```
 
 The server will start at `http://localhost:9000`.

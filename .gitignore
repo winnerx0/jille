@@ -1,4 +1,5 @@
 .env
 
 client/node_modules
+client/.output
 .vercel
