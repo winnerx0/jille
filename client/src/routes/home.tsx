@@ -18,8 +18,12 @@ export const Route = createFileRoute('/home')({
 
 const CreatePollSchema = z.object({
   title: z.string().min(5, 'Title must be at least 5 characters'),
-  options: z.array(z.string().min(1, 'Option cannot be empty')).min(2, 'At least 2 options required'),
-  expires_at: z.string().refine((val) => !isNaN(Date.parse(val)), 'Invalid date'),
+  options: z
+    .array(z.string().min(1, 'Option cannot be empty'))
+    .min(2, 'At least 2 options required'),
+  expires_at: z
+    .string()
+    .refine((val) => !isNaN(Date.parse(val)), 'Invalid date'),
 })
 
 function RouteComponent() {
@@ -27,7 +31,11 @@ function RouteComponent() {
   const queryClient = useQueryClient()
   const [isCreating, setIsCreating] = useState(false)
 
-  const { data: polls, isLoading, error } = useQuery({
+  const {
+    data: polls,
+    isLoading,
+    error,
+  } = useQuery({
     queryKey: ['polls'],
     queryFn: pollAPI.getAllPolls,
     retry: false,
@@ -43,14 +51,16 @@ function RouteComponent() {
     },
     onError: (error: any) => {
       toast.error(error.response?.data?.message || 'Failed to create poll')
-    }
+    },
   })
 
   const form = useForm({
     defaultValues: {
       title: '',
       options: ['', ''],
-      expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+      expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+        .toISOString()
+        .split('T')[0],
     },
     validators: {
       onSubmit: CreatePollSchema,
@@ -258,6 +268,7 @@ function RouteComponent() {
                         onClick={() =>
                           field.handleChange([...field.state.value, ''])
                         }
+                        disabled={field.state.value.length >= 5}
                       >
                         <Plus className="w-4 h-4 mr-2" /> Add Option
                       </Button>
